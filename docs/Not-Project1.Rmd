@@ -1,0 +1,71 @@
+---
+title: "Not-Project1"
+author: "Kirsten Bauck"
+date: "2025-02-07"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(knitr)
+library(gridExtra)
+library(corrplot)
+# Decision Tree
+library(tree)
+library(rpart)
+library(partykit)
+# Random Forest
+library(caret)
+library(randomForest)
+# AdaBoost
+library(adabag)
+```
+
+
+# Introduction
+This is the kaggle link: https://www.kaggle.com/datasets/fedesoriano/stellar-classification-dataset-sdss17
+• Why did you choose this sample?
+• What did you hope to learn?
+• What is important/interesting about the data?
+• How confident do you feel in the source of the data?
+
+
+# Data Cleaning
+• What was necessary to get the data properly cleaned?
+• What challenges did you encounter while cleaning?
+• A short description of key variables in the data set.
+• A data table presenting an abbreviated tidydata set.
+
+```{r Data-Cleaning, echo=False}
+set.seed(578)
+stars = read.csv("star_classification.csv")
+
+# Remove extreme outliers
+outliers = boxplot.stats(stars$u[stars$class == "STAR"])$out
+removed = stars[stars$u %in% outliers & stars$class == "STAR", ][9, ]
+stars = stars[-79544, ]
+
+# Checking for rows NA values
+rows_with_na = stars[!complete.cases(stars), ]
+# Checking for duplicate values
+rows_duplicated = stars[duplicated(stars), ]
+
+```
+
+# Data Visualizations
+• Figures/graphs are to be presented on their own page.
+• Each figure should come a detailed description/caption.
+• These should come after the intro and cleaning paragraphs.
+• Descriptions provided additional to the caption should be included in normal paragraph text.
+• Focus on what the visualization says about achieving an outcome, like prediction of a response, or alignment of groupings (such as prediction of a categorical
+response)
+
+# Conclusions
+• If given more time, what other statistical or exploratory analysis might you have done?
+• If interested, attempt a statistical or additional exploratory analysis.
+• What did you learn if you used this data in a previous project?
+• What challenges in analysis would you foresee
+
+# Link to GitHub Repository
+Something like: devtools::install_github('DrBuscaglia/F23DemoPackage')
