@@ -13,7 +13,7 @@ StellarObjs = StellarObjs[-79544, ]
 StellarObjs = StellarObjs %>% mutate(date = as.Date(MJD, origin = "1858-11-17"))
 
 # Remove unnecessary columns
-StellarObjs = StellarObjs %>% select(-c(run_ID, rerun_ID, cam_col, spec_obj_ID,
+StellarObjs = StellarObjs %>% select(-c(obj_ID, run_ID, rerun_ID, cam_col, spec_obj_ID,
                             field_ID, plate, fiber_ID, MJD))
 
 # Rename columns
@@ -26,6 +26,9 @@ StellarObjs = StellarObjs %>% rename(
   near_infrared_filter = i,
   infrared_filter = z
 )
+
+# Move class column to the front
+StellarObjs <- select(StellarObjs, class, everything())
 
 # Save the dataframe to the data/ directory
 usethis::use_data(StellarObjs)

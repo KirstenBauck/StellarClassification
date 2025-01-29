@@ -7,7 +7,6 @@
 \format{
 a data frame with 99,999 observations
 \describe{
-  \item{obj_ID}{The unique value that identifies the object in the image catalog used by CAS.}
   \item{right_ascension_angle}{Right Ascension Angle at J2000 epoch.}
   \item{declination_angle}{Declinatino angle at J2000 epoch.}
   \item{ultraviolet_filter}{Ultraviolet filter in the photometric system.}
