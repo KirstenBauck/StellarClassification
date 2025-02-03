@@ -58,14 +58,14 @@ Above is a glimpse into the tidied dataset. Using this dataset we can predict a 
 
 ```{r Figure1, echo=FALSE, warning=FALSE}
 ggplot(StellarObjs, aes(x = redshift, fill = class)) +
-  geom_histogram(bins = 50, position = "identity", color = "black", alpha = 0.4) +
-  scale_fill_manual(values = c("GALAXY" = "#1f78b4", 
-                               "STAR" = "#33a02c", 
-                               "QSO" = "#e31a1c"),
+  geom_histogram(bins = 50, position = "identity", color = "black", alpha = 0.6) +
+  scale_fill_manual(values = c("GALAXY" = "#e88794", 
+                               "STAR" = "#9279b3", 
+                               "QSO" = "#60b7c8"),
                     labels = c("Galaxy", "Quasar", "Star")) +
-  scale_color_manual(values = c("GALAXY" = "#1f78b4", 
-                               "STAR" = "#33a02c", 
-                               "QSO" = "#e31a1c"),
+  scale_color_manual(values = c("GALAXY" = "#e88794", 
+                               "STAR" = "#9279b3", 
+                               "QSO" = "#60b7c8"),
                      name = "Object Type") +
   guides(color = guide_legend(
     override.aes = list(size = 3, alpha = 1),  # Larger points in legend
@@ -107,6 +107,8 @@ ggplot(StellarObjs, aes(x = redshift, fill = class)) +
       minor_breaks = seq(0, 5, by = 0.25),  
       expand = c(0, 0)
     )
+
+#ggsave("redshift.jpg")
 ```
 
 This distribution of redshifts shows a clear structure in our observable universe. Stars, with their redshift values clustered at zero, are primarily local objects within the Milky Way galaxy. This is because redshift corresponds to the ratio between the observed wavelength of light and its original wavelength. As such, the higher the redshift, the further away the object is and the further back in time we are seeing it. Galaxies show a broader distribution of redshifts between 0 and 1, representing the galaxies in our cosmic neighborhood and into the medium-distant universe. Quasars, showing the highest and most widely distributed redshifts (up to 3.5), are among the most distant objects we can observe. These high redshifts are a consequence of them being extremely luminous, as they are powered by super massive black holes. This makes them visible even at great distances where normal galaxies or stars would be too faint to detect. This distribution pattern demonstrates how different classes of astronomical objects occupy different time periods in the cosmos. Quasars serve as a way to let us peer deeper into the early universe then most other stellar objects.
@@ -114,6 +116,8 @@ This distribution of redshifts shows a clear structure in our observable univers
 \newpage
 
 ```{r Figure2, echo=FALSE, warning=FALSE}
+#polar coordinates
+
 # Famous objects
 famous_objects <- data.frame(
   name = c("Polaris (North Star)", "Andromeda Galaxy"),
@@ -148,71 +152,78 @@ ggplot(StellarObjs, aes(x = right_ascension_angle, y = declination_angle, color 
             size = 0.8) +
   geom_point(data = constellation_stars,
              aes(x = ra, y = dec),
-             color = "gold",
+             color = "gray20",
              size = 2) +
-  annotate("text", x = 183.86, y = 40, label = "Big Dipper", 
+  annotate("text", x = 183.86, y = 70, label = "Big Dipper", 
            color = "gray20", size = 3.5, fontface = "bold") +
-  scale_color_manual(values = c("GALAXY" = "#1f78b4", 
-                               "STAR" = "#33a02c", 
-                               "QSO" = "#e31a1c"),
+  scale_color_manual(values = c("GALAXY" = "#e88794", 
+                               "STAR" = "#9279b3", 
+                               "QSO" = "#60b7c8"),
                      labels = c("Galaxy", "Quasar", "Star"),
                      name = "Object Type") +
   guides(color = guide_legend(
-    override.aes = list(size = 3, alpha = 1),  # Larger points in legend
-    keywidth = 0.7,  # Width of the color boxes
-    keyheight = 0.5,  # Height of the color boxes
-    nrow = 1,  # Force legend to be in one row
-    title.position = "top",  # Place title above the legend
-    label.position = "bottom",  # Place labels below the color boxes
+    override.aes = list(size = 3, alpha = 1),
+    keywidth = 0.7,
+    keyheight = 0.5,
+    nrow = 1,
+    title.position = "top",
+    label.position = "bottom",
     spacing.x = unit(1, "mm")
   )) +
   geom_point(data = famous_objects,
              aes(x = ra, y = dec),
-             color = "gold",
+             color = "gray20",
              size = 2) +
-  annotate("text", x = 40, y = 80, label = "Polaris (North Star)", 
+  annotate("text", x = 40, y = 80, label = "Polaris", 
            color = "gray20", size = 3.5, fontface = "bold") +
-  annotate("text", x = 40, y = 35, label = "Andromeda Galaxy", 
+  annotate("text", x = 25, y = 42, label = "Andromeda", 
            color = "gray20", size = 3.5, fontface = "bold") +
   labs(
-    title = "Map of SDSS Stellar Objects",
-    subtitle = "Featuring the Big Dipper, Andromeda Galaxy, and Polaris",
+    title = "Map of SDSS Stellar Objects in Northern Sky",
+    subtitle = "Featuring the Big Dipper, Andromeda Galaxy, and Polaris (North Star)",
     x = "Right Ascension (degrees)",
     y = "Declination (degrees)",
-    color = "Object Type",
-    caption = "Data Source: Kaggle"
+    color = "Object Type"
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    legend.position = c(0.95, 1), 
-    legend.justification = c(1, 0),    # Anchor point for positioning
-    legend.title = element_text(size = 8, face = "bold"),
-    legend.text = element_text(size = 7),
-    legend.spacing = unit(0.1, "pt"),
+    plot.title = element_text(size = 14, face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    legend.position = "right",
+    legend.title = element_text(size = 9, face = "bold"),
+    legend.text = element_text(size = 8),
+    legend.box = "vertical",
+    legend.spacing = unit(2, "mm"),
     legend.box.background = element_rect(color = "gray80", 
                                          fill = "white", size = 0.5),
-    plot.title = element_text(size = 19, face = "bold"),
-    plot.subtitle = element_text(size = 11),
     panel.grid.major = element_line(color = "gray80", linewidth = 0.5),
-    panel.grid.minor = element_line(color = "gray90", linewidth = 0.25)
+    panel.grid.minor = element_line(color = "gray90", linewidth = 0.5),
+    axis.text.x = element_text(size = 10, face = "bold"),  # Keep RA labels
+    axis.text.y = element_blank(),
+    axis.title.x = element_blank(),  
+    axis.title.y = element_blank()
   ) +
-  scale_y_continuous(
-    limits = c(-30, 90),
-    breaks = seq(-30, 90, by = 30),
-    minor_breaks = seq(-30, 90, by = 15), 
+  scale_x_continuous(
+    limits = c(0, 360),
+    breaks = seq(0, 360, by = 60),  # Major ticks at every 60°
+    minor_breaks = seq(0, 360, by = 30),  # Minor ticks every 30°
+    labels = function(x) paste0(x, "°"),
     expand = c(0, 0)
   ) +
-    scale_x_continuous(
-    limits = c(0, 362),
-    breaks = seq(0, 360, by = 60),  
-    minor_breaks = seq(0, 360, by = 30),  
-    expand = c(0, 0)
-  ) +
-  coord_equal() +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray20", alpha = 0.5) +
-  annotate("text", x = 325, y = 2, label = "Celestial Equator", color = "gray20", 
-           size = 3.5, fontface = "bold")
+  coord_polar() +
+  geom_hline(yintercept = 0, linetype = "dashed", 
+             color = "black", alpha = 0.5) +
+  annotate("text", x = 0, y = -30, label = "-30°", color = "black", size = 3) +
+  annotate("text", x = 0, y = 0, label = "0°", color = "black", size = 3) +
+  annotate("text", x = 0, y = 30, label = "30°", color = "black", size = 3) +
+  annotate("text", x = 0, y = 60, label = "60°", color = "black", size = 3) +
+  annotate("text", x = 0, y = 90, label = "90°", color = "black", size = 3) +
+  annotate("text", x = 180, y = 0, label = "0°", color = "black", size = 3) +
+  annotate("text", x = 180, y = 30, label = "30°", color = "black", size = 3) +
+  annotate("text", x = 180, y = 60, label = "60°", color = "black", size = 3) +
+  annotate("text", x = 180, y = 90, label = "90°", color = "black", size = 3)
 
+#ggsave("map.jpg")
 ```
 
 This SDSS sky map reveals the systematic way in which this subset of data was chosen from the SDSS survey, with two primary survey regions clearly visible. These two regions are the larger northern galactic cap region (120-240 degrees RA) and the southern galactic cap region, which is divided into two (0-40 and 320-360 degrees RA). The choice in these two regions show how this dataset avoids the dusty galactic plane, which is filled with dust clouds and dark lanes. By avoiding this region, one can maximize the surveys ability to accurately detect, measure, and classify extragalactic objects. In this map we can see that galaxies dominate numerically and appear to be uniformally distributed within survey lines across the two survey regions. Quasars are more sparsely scattered but follow a similar pattern to galaxies. Stars, while also within the survey regions, also notably form an arc-like structure between the two main survey regions. I included familiar reference points like the Big Dipper and Polaris to help orient viewers and provide scale context. Through this visualization, we can analyze the two distinct survey regions in order to get a more fundamental understanding of our universe. 
