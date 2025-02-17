@@ -1,7 +1,6 @@
 ---
-title: "Not-Project1"
+title: "SDSS Stellar Classification"
 author: "Kirsten Bauck"
-date: "2025-02-07"
 output: pdf_document
 ---
 
@@ -10,51 +9,58 @@ knitr::opts_chunk$set(echo = TRUE)
 library(kableExtra)
 library(ggplot2)
 library(StellarClassification)
+library(dplyr)
 ```
 
 
 # Introduction
 I chose to explore this stellar classification dataset because of my fascination with astronomy and the challenges it presents in physics and data science. The dataset, derived from the Sloan Digital Sky Survey (SDSS), tackles one of astronomy's fundamental tasks: classifying celestial objects. In this case, classifying them as stars, galaxies, or quasars. This can be a challenge when it comes to identifying minority classes like quasars, which despite being less common, play a much needed role in helping us understand our universe.
 
-This data is significant as it plays a foundation role in astronomical research. Stellar classification is key to understanding the fundamental properties of celestial objects, including their temperature, composition, and evolutionary stage. The more scientists can accurately classify stellar objects, the better they can understand how such objects interact with each other. Classifications such as these have historically led to discoveries such as the distinction between the Andromeda galaxy and out own Milky Way. From this, I hope to learn how data science techniques can be used to analyze and explore a dataset in such a way that makes future modeling more efficient.
+This data is significant as it plays a foundation role in astronomical research. Stellar classification is key to understanding the fundamental properties of celestial objects, including their temperature, composition, and evolutionary stage. The more scientists can accurately classify stellar objects, the better they can understand how such objects interact with each other. Classifications such as these have historically led to discoveries such as the distinction between the Andromeda galaxy and our own Milky Way. From this, I hope to learn how data science techniques can be used to analyze and explore a dataset in such a way that makes future modeling more efficient.
 
 Regarding the data source, I have a low level of confidence. While this dataset is available on [Kaggle](https://www.kaggle.com/datasets/fedesoriano/stellar-classification-dataset-sdss17) and was curated by a data scientist with a double masters credentials, it represents a processed version of SDSS data. This curated process, while probably making the datasource more accessible for analysis does add a layer of separation from a primary source and should not be used in a real analysis
 
 # Data Cleaning
-Since this data was curated, the data cleaning process was relatively simple and few challenges were encountered. The data cleaning process worked as follows. First, I calculated and removed any extreme outliers from the dataset. Then I changed the modified Julian Date (MJD) column to a simple date column with year, month, day. Finally, I removed any unnecessary columns within the dataset, such as extraneous ID fields and renamed columns to be more easily interpretable.
+Since this data was curated, the data cleaning process was relatively simple and few challenges were encountered. The data cleaning process worked as follows and was done in R. First, I calculated and removed any extreme outliers from the dataset. Then I changed the modified Julian Date (MJD) column to a simple date column with year, month, day. Finally, I removed any unnecessary columns within the dataset, such as extraneous ID fields and renamed columns to be more easily interpretable.
 
-The dataset consists of 99,999 observations collected by SDSS, describing celestial objects on 10 features. The key variables include:
+The dataset consists of 99,999 observations collected by SDSS, describing celestial objects on 10 features. The key variables are split into the 3 following main types and sample data is shown in Table 1.
 
-1. Spectral measurements:
-    - Ultraviolet, green, red, and infrared filter readings
-    - Redshift measurements (indicating the Doppler shift of light)
-2. Positional data in the form of Right Ascension angle and Declination angle
-3. Classification label
-    - Three categories GALAXY (majority class), QSO (quasars), and STAR
-    - Galaxies represent over 50% of the observations, with quasars and stars making up the remainder
+1. Classification label & Date
+    - **Class** consists of three categories GALAXY (majority class), QSO (quasars), and STAR
+    - **Date** date object was observed by SDSS
+2. Positional data
+    - **Right Ascension angle** which is the astronomical equivalent of longitude
+    - **Declination angle** which is the astronomical equicalent of latitude
+3. Spectral measurements:
+    - **Ultraviolet filter**, **Green filter**, **Red Filter**, **Near Infrared Filter** and **Infrared Filter** readings
+    - **Redshift** measurements (indicating the Doppler shift of light)
 
-\newpage
 
 ```{r Data-Cleaning, echo=FALSE}
-View(StellarObjs)
-StellarObjs[1:20, ] %>%
+StellarObjs_rounded <- StellarObjs[1:30, ] %>%
+  mutate(across(where(is.numeric), \(x) round(x, 2)))
+
+StellarObjs_rounded %>%
   kable(format = "latex", 
         booktabs = TRUE,
-        font_size = 8,
+        font_size = 25,
         col.names = c("Class", "Right Ascension Angle", "Declination Angle",
                       "Ultraviolet Filter", "Green filter", "Red Filter",
                       "Near Infrared Filter", "Infrared Filter", "Redshift",
-                      "Date")) %>%
-  kable_styling(latex_options = c("scale_down"),
+                      "Date"),
+        caption = "Sample of SDSS Stellar Object Classification Data") %>%
+  kable_styling(latex_options = c("scale_down", "hold_position", "landscape"),
                 full_width = FALSE) %>%
-  column_spec(1:ncol(StellarObjs), width = "0.8in", latex_valign='m') %>%
-  row_spec(0, bold = TRUE, color = "white", background = "#0a1882")
+  column_spec(1:ncol(StellarObjs), width = "0.7in", latex_valign='m') %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#0a1882") %>%
+  landscape()
 ```
-Above is a glimpse into the tidied dataset. Using this dataset we can predict a stellar object's class. 
-
-\newpage
 
 # Data Visualizations
+
+The distribution of redshifts in Figure 1 provides a clear view of the spatial arrangement of stellar objects in our observable universe. Stars, with their redshift values clustered at zero, are primarily local objects within the Milky Way galaxy. Redshift is a measure of the stretching of light waves as objects move away from us, with higher redshifts corresponding to greater distances. The galaxies, in contrast, exhibit a broader distribution of redshifts between 0 and 1, reflecting their presence in the nearby and mid-distance universe. Quasars, identifiable by their high redshifts (up to 3.5), are among the most distant objects visible to us. Their extreme luminosity, powered by supermassive black holes, allows them to be visible at great distances where normal stars or galaxies would be too faint.
+
+This visualization shows the distinct clustering of different stellar object types in our universe, with stars mostly within the local universe, galaxies spread through nearby regions, and quasars giving us a glimpse into the early cosmos.
 
 ```{r Figure1, echo=FALSE, warning=FALSE}
 ggplot(StellarObjs, aes(x = redshift, fill = class)) +
@@ -77,21 +83,20 @@ ggplot(StellarObjs, aes(x = redshift, fill = class)) +
     spacing.x = unit(1, "mm")
   )) +
   labs(
-    title = "SDSS Redshift Distribution by Stellar Object",
+    title = "Figure 1: SDSS Redshift Distribution by Stellar Object",
     x = "Redshift",
     y = "Count",
     fill = "Stellar Object",
-    caption = "Data source: Kaggle"
   ) +
   theme_minimal(base_size = 14) +
   theme(legend.position = c(0.95, 0.6), 
         legend.justification = c(1, 0),    # Anchor point for positioning
-        legend.title = element_text(size = 8, face = "bold"),
+        legend.title = element_text(size = 7, face = "bold"),
         legend.text = element_text(size = 7),
         legend.spacing = unit(0.1, "pt"),
         legend.box.background = element_rect(color = "gray80", 
                                              fill = "white", size = 0.5),
-        plot.title = element_text(size = 19, face = "bold"),
+        plot.title = element_text(size = 14, face = "bold"),
         plot.subtitle = element_text(size = 11),
         panel.grid.major = element_line(color = "gray80", linewidth = 0.5),
         panel.grid.minor = element_line(color = "gray90", linewidth = 0.25)) +
@@ -111,9 +116,13 @@ ggplot(StellarObjs, aes(x = redshift, fill = class)) +
 #ggsave("redshift.jpg")
 ```
 
-This distribution of redshifts shows a clear structure in our observable universe. Stars, with their redshift values clustered at zero, are primarily local objects within the Milky Way galaxy. This is because redshift corresponds to the ratio between the observed wavelength of light and its original wavelength. As such, the higher the redshift, the further away the object is and the further back in time we are seeing it. Galaxies show a broader distribution of redshifts between 0 and 1, representing the galaxies in our cosmic neighborhood and into the medium-distant universe. Quasars, showing the highest and most widely distributed redshifts (up to 3.5), are among the most distant objects we can observe. These high redshifts are a consequence of them being extremely luminous, as they are powered by super massive black holes. This makes them visible even at great distances where normal galaxies or stars would be too faint to detect. This distribution pattern demonstrates how different classes of astronomical objects occupy different time periods in the cosmos. Quasars serve as a way to let us peer deeper into the early universe then most other stellar objects.
+*Figure 1: Distribution of redshifts across stellar objects (stars, galaxies, and quasars) in the SDSS dataset, highlighting the different distances of these objects from Earth.*
 
 \newpage
+
+Figure 2 maps the right ascension (RA) and declination (Dec) of stellar objects in the northern sky. The plot is a polar projection, placing familiar constellations and notable objects like the Big Dipper, Andromeda Galaxy, and Polaris within a wider cosmic context. The dataset shows galaxies as the dominant object type, evenly distributed across the surveyed regions, with quasars scattered more sparsely but still following similar patterns. Stars are also present, forming an arc-like structure between the two main survey regions.
+
+By avoiding the dusty galactic plane, the SDSS focuses on clearer skies that enhance the detection and classification of extragalactic objects. The inclusion of famous constellations and objects helps orient the viewer, offering a familiar backdrop for understanding the cosmic distribution of these stellar objects.
 
 ```{r Figure2, echo=FALSE, warning=FALSE}
 #polar coordinates
@@ -179,7 +188,7 @@ ggplot(StellarObjs, aes(x = right_ascension_angle, y = declination_angle, color 
   annotate("text", x = 25, y = 42, label = "Andromeda", 
            color = "gray20", size = 3.5, fontface = "bold") +
   labs(
-    title = "Map of SDSS Stellar Objects in Northern Sky",
+    title = "Figure 2: Map of SDSS Stellar Objects in Northern Sky",
     subtitle = "Featuring the Big Dipper, Andromeda Galaxy, and Polaris (North Star)",
     x = "Right Ascension (degrees)",
     y = "Declination (degrees)",
@@ -190,7 +199,7 @@ ggplot(StellarObjs, aes(x = right_ascension_angle, y = declination_angle, color 
     plot.title = element_text(size = 14, face = "bold"),
     plot.subtitle = element_text(size = 10),
     legend.position = "right",
-    legend.title = element_text(size = 9, face = "bold"),
+    legend.title = element_text(size = 7, face = "bold"),
     legend.text = element_text(size = 8),
     legend.box = "vertical",
     legend.spacing = unit(2, "mm"),
@@ -225,17 +234,18 @@ ggplot(StellarObjs, aes(x = right_ascension_angle, y = declination_angle, color 
 
 #ggsave("map.jpg")
 ```
+*Figure 2: Polar map of SDSS stellar objects in the northern sky, showing their distribution relative to the Big Dipper, Polaris, and other key cosmic features.* 
 
-This SDSS sky map reveals the systematic way in which this subset of data was chosen from the SDSS survey, with two primary survey regions clearly visible. These two regions are the larger northern galactic cap region (120-240 degrees RA) and the southern galactic cap region, which is divided into two (0-40 and 320-360 degrees RA). The choice in these two regions show how this dataset avoids the dusty galactic plane, which is filled with dust clouds and dark lanes. By avoiding this region, one can maximize the surveys ability to accurately detect, measure, and classify extragalactic objects. In this map we can see that galaxies dominate numerically and appear to be uniformally distributed within survey lines across the two survey regions. Quasars are more sparsely scattered but follow a similar pattern to galaxies. Stars, while also within the survey regions, also notably form an arc-like structure between the two main survey regions. I included familiar reference points like the Big Dipper and Polaris to help orient viewers and provide scale context. Through this visualization, we can analyze the two distinct survey regions in order to get a more fundamental understanding of our universe. 
 
-
-\newpage
 
 # Conclusions
 
 Given more time, there are a couple more analysis that I would have done. First of all, I would want to do a full feature importance analysis, where I could quantify the contribution of each feature to a model. In addition, I would also like to use techniques such as PCA to visualize the class separability in the high dimensional space of all the variables (filters, redshift, and position) interacting. Finally, I would also want to go more in depth into an error analysis, where I examine misclassified objects and try to identify any systemic biases or challenging regions in the space.
 
-In a previous analysis of this SDSS data, various machine learning models were applied to classify the stellar objects. A summary of the models. their performance, advantages, and limitations is provided below:
+In a previous analysis of this SDSS data, various machine learning models were applied to classify the stellar objects. A summary of the models, their performance, advantages, and limitations is provided in Table 2.
+
+\newpage
+
 ```{r summary-stats, echo=FALSE}
 # Summary statistics
 summary_table <- data.frame(
@@ -249,16 +259,27 @@ summary_table <- data.frame(
                     "Sensitive to outliers, Computationally intensive")
 )
 
-kable(summary_table, caption = "Model Summary and Comparison")
+kable(summary_table,
+      format="latex",
+      booktabs = TRUE,
+      font_size = 25,
+      col.names = c("Model", "Test Error", "Advantages", "Limitations"),
+      caption = "Model Summary and Comparison") %>%
+    kable_styling(latex_options = c("scale_down", "hold_position", "landscape"),
+                full_width = FALSE) %>%
+  column_spec(1, width = "0.8in") %>%  # "Model" column width
+  column_spec(2, width = "0.5in") %>%  # "Test Error" column width
+  column_spec(3, width = "2.0in") %>%  # "Advantages" column width
+  column_spec(4, width = "2.0in") %>%  # "Limitations" column width
+  row_spec(0, bold = TRUE, color = "white", background = "#0a1882") 
 ```
 The Random Forest model, having an ensemble apprpoach, demonstrated the lowest test error, indicating its effectiveness at capturing some of the complex patters in the dataset while also reducing noise. AdaBoost also performed well, as it was able to leverage its ability to refine predictions by focusing on misclassified examples but it was computationaly expensive. Throughout my analysis, it seemed that the redshift variable was the most important in classifying the stellar objects. From this previous analysis, I learned that balancing interpretability (Decision Tree) and accuracy (Random Forest) is a key challenge, especially as a datasets' dimensions increase and modeling becomes more computationaly expensive. Before my analysis I did not fully understand the point of an intepretable model that was known to perform less well. But after conducing my analysis, I now understand that the more interpretable models are necessary to try and understand what less interpretable models are doing in the background.
 
 When it comes to analyzing this dataset further, there are some potential challenges. First of all, the class imbalance of the dataset consisting mostly of galaxies can easily bias any model created. In addition, as one tries to incorporate additional spectral features, analysis could become more computationally intensive and harder to understand. The fact that most of the filters are highly correlated could lead to redundancy in models, which then complicates feature importance interpretation and could even affect model stability. Most of this data is photometric as well, which is less precise compared to spectroscopic data, so the reliance on such data to classify objects could limit the classification accuracy, especially when distinguish between quasars and stars.
 
 # Link to GitHub Repository
-```{r, eval=FALSE}
-devtools::install_github('KirstenBauck/StellarClassification')
-```
+[**<span style="text-decoration: underline; color: blue;">Click here to install from GitHub</span>**](https://github.com/KirstenBauck/StellarClassification)
+
 
 # Citations
 fedesoriano. (January 2022). Stellar Classification Dataset - SDSS17. Retrieved November 30th, 2024 from https://www.kaggle.com/fedesoriano/stellar-classification-dataset-sdss17.
